@@ -17,12 +17,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.example.payten_template.navigation.Screen
 import com.example.payten_template.ui.theme.Background
 import com.example.payten_template.ui.theme.ButtonColor
-import com.example.payten_template.ui.theme.Purple700
 import com.example.payten_template.ui.theme.TextColor
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.*
 
 
 
@@ -73,9 +80,22 @@ fun LoginScreen(navController : NavController){
              Text(text = "SINHRONIZACIJA")
          }
          if(openDialogSync.value){
+             var listItems = arrayOf("Ovde", "ce", "se", "vuci", "/getAllLocations", "sa", "backend-a")
+             runBlocking{
+                 val client = HttpClient(CIO) {
+                     install(ContentNegotiation) {
+                         json(Json {
+                             prettyPrint = true
+                             isLenient = true
+                         })
+                     }
+                 }
+                 val customer: Array<String> = client.get("http://161.97.170.99:8081/api/v1/getAllLocations").body()
+                 listItems = customer
 
+}
              val contextForToast = LocalContext.current.applicationContext
-             val listItems = arrayOf("Ovde", "ce", "se", "vuci", "/getAllLocations", "sa", "backend-a")
+
              var selectedItem by remember {
                  mutableStateOf(listItems[0])
              }
@@ -147,11 +167,16 @@ fun LoginScreen(navController : NavController){
              )
          }
          if(openDialogLogin.value){
+
+
+
              val contextForToast = LocalContext.current.applicationContext
              val listItems = arrayOf("Ovde", "ce", "se", "vuci", "lista", "korisnika", "sa", "Room-a")
              var selectedItem by remember {
                  mutableStateOf(listItems[0])
              }
+
+
              var expanded by remember {
                  mutableStateOf(false)
              }
@@ -246,8 +271,13 @@ fun LoginScreen(navController : NavController){
     }
 
 
+}
+    }
 
-}}
+
+
+
+
 
 
 
