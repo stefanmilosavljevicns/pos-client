@@ -6,8 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +14,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
+import com.example.payten_template.Data.User
+import com.example.payten_template.Data.UserDB
+import com.example.payten_template.Data.UserRepository
 import com.example.payten_template.navigation.Screen
 import com.example.payten_template.ui.theme.Background
 import com.example.payten_template.ui.theme.ButtonColor
@@ -27,15 +29,25 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 
-
+@Serializable
+data class UserRest(val id: String,val pin: Int, val nickname: String, val name: String,val lastName: String,val email: String,val creationDate: String,val location : String?,val role: String,val grade: Float)
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LoginScreen(navController : NavController){
+    var repository: UserRepository
+    val customerDb = UserDB.getInstance(LocalContext.current.applicationContext)
+    val customerDao = customerDb.todoDao()
+    repository = UserRepository(customerDao)
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,6 +92,7 @@ fun LoginScreen(navController : NavController){
              Text(text = "SINHRONIZACIJA")
          }
          if(openDialogSync.value){
+
              var listItems = arrayOf("Ovde", "ce", "se", "vuci", "/getAllLocations", "sa", "backend-a")
              runBlocking{
                  val client = HttpClient(CIO) {
@@ -151,11 +164,27 @@ fun LoginScreen(navController : NavController){
                                  expanded = expanded,
                                  onDismissRequest = { expanded = false }
                              ) {
+
                                  listItems.forEach { selectedOption ->
                                      // menu item
                                      DropdownMenuItem(onClick = {
                                          selectedItem = selectedOption
-                                         Toast.makeText(contextForToast, "Popunjavam tabelu za", Toast.LENGTH_SHORT).show()
+                                         Toast.makeText(contextForToast, "Popunjavam tabelu za "+selectedItem, Toast.LENGTH_SHORT).show()
+                                         runBlocking{
+                                             val client = HttpClient(CIO) {
+                                                 install(ContentNegotiation) {
+                                                     json(Json {
+                                                         prettyPrint = true
+                                                         isLenient = true
+                                                     })
+                                                 }
+                                             }
+                                            val customer: Array<User> = client.get("http://161.97.170.99:8081/api/v1/getLocation/"+selectedItem).body()
+                                            repository.deleteAllTodos()
+                                             for (i in customer.indices) {
+                                                 repository.addTodo(customer[i])
+                                             }
+                                         }
                                          expanded = false
                                          openDialogSync.value = false
                                      }) {
@@ -171,7 +200,7 @@ fun LoginScreen(navController : NavController){
 
 
              val contextForToast = LocalContext.current.applicationContext
-             val listItems = arrayOf("Ovde", "ce", "se", "vuci", "lista", "korisnika", "sa", "Room-a")
+             val listItems = customerDb.todoDao().getAll()
              var selectedItem by remember {
                  mutableStateOf(listItems[0])
              }
@@ -209,6 +238,7 @@ fun LoginScreen(navController : NavController){
                          ) {
 
                              // text field
+
                              TextField(
                                  value = selectedItem,
                                  onValueChange = {
@@ -216,6 +246,7 @@ fun LoginScreen(navController : NavController){
                                  },
                                  readOnly = true,
                                  label = { Text(text = "Radnik") },
+                                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                                  trailingIcon = {
                                      ExposedDropdownMenuDefaults.TrailingIcon(
                                          expanded = expanded
@@ -233,7 +264,7 @@ fun LoginScreen(navController : NavController){
                                      // menu item
                                      DropdownMenuItem(onClick = {
                                          selectedItem = selectedOption
-                                         Toast.makeText(contextForToast, selectedOption, Toast.LENGTH_SHORT).show()
+
                                          expanded = false
                                      }) {
                                          Text(text = selectedOption)
@@ -245,8 +276,10 @@ fun LoginScreen(navController : NavController){
                              color = TextColor
                          )
                          Spacer(modifier = Modifier.padding(5.dp))
-                         TextField(value = mText,
+                         var pin by remember { mutableStateOf("") }
+                         TextField(
                              visualTransformation =  PasswordVisualTransformation(),
+                             value = pin,
                              colors = TextFieldDefaults.textFieldColors(
                                  backgroundColor = ButtonColor
                              ),
@@ -254,12 +287,23 @@ fun LoginScreen(navController : NavController){
                              textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                              placeholder = {Text(text="PIN")},
                              onValueChange = {
-                                 if (it.length <= 4) mText = it
+
+                                 if (it.length <= 4) pin = it
                              },
                              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword))
                          Spacer(modifier = Modifier.padding(5.dp))
                          Button(onClick = {
-                           navController.navigate(route = Screen.HomeScreen.route)
+                             println("PIN IZ BAZE"+customerDb.todoDao().checkPin(selectedItem))
+                             println("PIN"+pin)
+                             if(customerDb.todoDao().checkPin(selectedItem).equals(Integer.parseInt(pin)
+                                 )){
+                                 navController.navigate(route = Screen.HomeScreen.route)
+                             }
+                             else{
+                                 Toast.makeText(contextForToast, "Neispravan PIN, pokusajte ponovo!", Toast.LENGTH_SHORT).show()
+                                 openDialogLogin.value = false
+                             }
+
                          },
                              colors = ButtonDefaults.buttonColors(backgroundColor = ButtonColor)
                          ) {

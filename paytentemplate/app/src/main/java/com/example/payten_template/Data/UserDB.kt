@@ -18,7 +18,7 @@ abstract class UserDB : RoomDatabase() {
                         context.applicationContext,
                         UserDB::class.java,
                         "todo_list_database"
-                    ).fallbackToDestructiveMigration()
+                    ).fallbackToDestructiveMigration().allowMainThreadQueries()
                         .build()
                     INSTANCE = instance
                 }
