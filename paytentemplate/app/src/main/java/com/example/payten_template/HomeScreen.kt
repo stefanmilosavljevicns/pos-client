@@ -16,7 +16,7 @@ import com.example.payten_template.ui.theme.ButtonColor
 import com.example.payten_template.ui.theme.TextColor
 
 @Composable
-fun HomeScreen(navController : NavController) {
+fun HomeScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()

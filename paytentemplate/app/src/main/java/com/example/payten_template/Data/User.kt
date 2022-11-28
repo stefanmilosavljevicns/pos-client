@@ -1,13 +1,13 @@
 package com.example.payten_template.Data
 
-import androidx.room.ColumnInfo
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity(tableName = "my_todo_list")
-data class User (
+data class User(
     @PrimaryKey
     val id: String,
     val pin: Int,
@@ -16,7 +16,7 @@ data class User (
     val lastName: String,
     val email: String,
     val creationDate: String,
-    val location : String?,
+    val location: String?,
     val role: String,
     val grade: Float
 )
