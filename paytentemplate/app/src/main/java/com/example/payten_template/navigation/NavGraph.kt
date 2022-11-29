@@ -7,9 +7,7 @@
     import androidx.navigation.NavHostController
     import androidx.navigation.compose.NavHost
     import androidx.navigation.compose.composable
-    import com.example.payten_template.AnimatedSplashScreen
-    import com.example.payten_template.HomeScreen
-    import com.example.payten_template.LoginScreen
+    import com.example.payten_template.*
 
 
     @Composable
@@ -26,5 +24,14 @@
             }
             composable(route = Screen.HomeScreen.route) {
                 HomeScreen(navController = navController)
+            }
+            composable(route = Screen.Rezervacije.route) {
+                Rezervacije(navController = navController)
+            }
+            composable(route = Screen.Rezervisi.route) {
+                Rezervisi(navController = navController)
+            }
+            composable(route = Screen.Arhiva.route) {
+                Arhiva(navController = navController)
             }
         }}
