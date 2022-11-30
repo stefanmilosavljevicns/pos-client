@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.payten_template.Data.User
 import com.example.payten_template.Data.UserDB
-import com.example.payten_template.Data.UserRepository
+import com.example.payten_template.Data.repositories.UserRepository
 import com.example.payten_template.navigation.Screen
 import com.example.payten_template.ui.theme.ButtonColor
 import com.example.payten_template.ui.theme.primaryColor
@@ -98,7 +98,9 @@ fun LoginScreen(navController: NavController) {
                 Button(
 
                     colors = ButtonDefaults.buttonColors(backgroundColor = primaryColor),
-                    onClick = { openDialogLogin.value = true },
+                    onClick = {
+                        openDialogLogin.value = true
+                    },
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .height(50.dp)

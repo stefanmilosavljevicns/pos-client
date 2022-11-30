@@ -27,6 +27,14 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
+        <receiver
+            android:name=".payment.PaynetBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="senderIntentFilter" />
+            </intent-filter>
+        </receiver>
     </application>
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest>

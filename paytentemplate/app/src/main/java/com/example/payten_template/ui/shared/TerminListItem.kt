@@ -36,8 +36,8 @@ fun TerminListItem(
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val date = termin.split(" ")[0]
-            val time = termin.split(" ")[1]
+            val time = termin.split(" ")[0]
+            val date = termin.split(" ")[1]
             Text(
                 text = "${time}H",
                 style = MaterialTheme.typography.h4,

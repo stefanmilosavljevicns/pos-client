@@ -1,43 +1,27 @@
 package com.example.payten_template
 
-import android.graphics.Color
-import android.graphics.fonts.FontFamily
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.graphics.Color.Companion.Gray
-import androidx.compose.ui.graphics.Color.Companion.Red
-import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontWeight.Companion.Black
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.ui.graphics.Color.Companion.White
-import androidx.ui.layout.ConstraintLayout
-import androidx.ui.layout.ConstraintSet
-import androidx.ui.res.imageResource
 import com.example.payten_template.navigation.Screen
-import com.example.payten_template.ui.theme.Background
 import com.example.payten_template.ui.theme.ButtonColor
-import com.example.payten_template.ui.theme.TextColor
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -86,7 +70,7 @@ fun HomeScreen(navController: NavController) {
         LazyVerticalGrid(
 
             verticalArrangement = Arrangement.Top,
-            cells = GridCells.Adaptive(150.dp),
+            columns = GridCells.Adaptive(150.dp),
             contentPadding = PaddingValues(
                 start = 12.dp,
                 top = 16.dp,

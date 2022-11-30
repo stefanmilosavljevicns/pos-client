@@ -1,8 +1,10 @@
-package com.example.payten_template.Data
+package com.example.payten_template.Data.repositories
+
+import com.example.payten_template.Data.User
+import com.example.payten_template.Data.UserDao
 
 
 class UserRepository(private val todoDatabaseDao: UserDao) {
-
 
     suspend fun addTodo(todoItem: User) {
         todoDatabaseDao.insert(todoItem)
