@@ -1,5 +1,7 @@
 package com.example.payten_template
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,7 +14,9 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Gray
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -22,10 +26,23 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.payten_template.navigation.Screen
 import com.example.payten_template.ui.theme.ButtonColor
+import io.github.g00fy2.quickie.QRResult
+import io.github.g00fy2.quickie.ScanQRCode
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(navController: NavController) {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ScanQRCode()){
+        if (it is QRResult.QRSuccess) {
+            //Toast.makeText(context, it.content.rawValue, Toast.LENGTH_SHORT).show()
+            navController.navigate("${Screen.Rezervacija.route}/${it.content.rawValue}")
+        }
+        if (it is QRResult.QRError){
+            Toast.makeText(context, "Nevalidan QR code", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
@@ -61,9 +78,9 @@ fun HomeScreen(navController: NavController) {
 
     }}
         val list = (1..4).map { it.toString() }
-        val title = listOf("Rezervacije","Rezervisi","Arhiva","Nista")
-        val desc = listOf("Pregledajte listu rezervacija","Izvrsite rezervaciju novog termina","Pregledajte arhivu","Za sada nista")
-        val ids = listOf(R.drawable.rezervacije,R.drawable.rezervisi,R.drawable.arhiva,R.drawable.nista)
+        val title = listOf("Rezervacije","Rezervisi","Arhiva","QR Skener")
+        val desc = listOf("Pregledajte listu rezervacija","Izvrsite rezervaciju novog termina","Pregledajte arhivu","Skeniraj QR kod")
+        val ids = listOf(R.drawable.rezervacije,R.drawable.rezervisi,R.drawable.arhiva,R.drawable.ic_qr_code)
         val navigations = listOf(Screen.Rezervacije.route,Screen.Rezervisi.route,Screen.Arhiva.route,Screen.LoginScreen.route)
         //val picture_ids = listOf()
 
@@ -87,7 +104,11 @@ fun HomeScreen(navController: NavController) {
                             .fillMaxSize().aspectRatio(1f).clickable(
                                 enabled = true,
                                 onClick = {
-                                    navController.navigate(route = navigations[index])
+                                    if(index != 3){
+                                        navController.navigate(route = navigations[index])
+                                    }else{
+                                        launcher.launch(null)
+                                    }
                                 }),
                         elevation = 10.dp,
                     ) {
@@ -107,11 +128,12 @@ fun HomeScreen(navController: NavController) {
                                         color = androidx.compose.ui.graphics.Color.White
                                 )
                             )
-                            Image(painterResource(id = ids[index]),null,
+                            Icon(painterResource(id = ids[index]),null,
                                 modifier = Modifier
 
                                     .width(50.dp)
-                                    .height(50.dp)
+                                    .height(50.dp),
+                                tint = Color.White
                                    )
                             Text(
                                 text = desc[index],

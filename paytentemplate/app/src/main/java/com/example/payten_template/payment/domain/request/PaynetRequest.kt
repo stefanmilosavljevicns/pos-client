@@ -26,7 +26,7 @@ data class Header(
 @Serializable
 data class PaynetRequest(
     val financial: Financial? = null,
-    //val command: Any? = null
+    val command: Command? = null
 )
 @Serializable
 data class Financial(
@@ -70,7 +70,7 @@ data class Options(
     companion object{
         val Default = Options(
             language = "sr",
-            print = false.toString()
+            print = true.toString()
         )
     }
 }
@@ -96,4 +96,22 @@ data class AmountsDelayed(
     val first: String,
     val subs: String,
     val currencyCode: String,
+)
+
+@Serializable
+data class Command (
+    val printer: Printer
+)
+
+@Serializable
+data class Printer (
+    val type: String,
+    val printLines: List<PrintLine>
+)
+
+@Serializable
+data class PrintLine (
+    val type: String,
+    val style: String? = null,
+    val content: String
 )

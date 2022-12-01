@@ -16,8 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.payten_template.Data.Rezervacija
+import com.example.payten_template.Data.Usluge
 import com.example.payten_template.Data.repositories.RezervacijeRepository
 import com.example.payten_template.navigation.SetupNavGraph
+import com.example.payten_template.payment.PaymentManager
 import com.example.payten_template.payment.PaynetBroadcastReceiver
 import com.example.payten_template.payment.domain.request.PaynetMessage
 import com.example.payten_template.ui.core.rezervacije.RezervacijeViewModel
@@ -35,6 +37,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        rezervacijeViewModel.refresh()
         setContent {
             PaytentemplateTheme{
                 val navController = rememberNavController()
@@ -55,11 +58,17 @@ class MainActivity : ComponentActivity() {
                     // update reservation
                     RezervacijeRepository.Instance.let { repo ->
                         repo.rezervacije.value.find { it.id.equals(PaynetBroadcastReceiver.reservationId) }?.let { rez ->
+                            val amount = Usluge[rez.services] ?: 600.0
                             CoroutineScope(Dispatchers.IO).launch {
                                 rez.placeno = true
                                 repo.updateReservation(rez)
                                 rezervacijeViewModel.refresh()
+                                PaymentManager(this@MainActivity).requestPrintBill(
+                                    rez,
+                                    amount,
+                                )
                             }
+
                         }
                     }
                 }else{}

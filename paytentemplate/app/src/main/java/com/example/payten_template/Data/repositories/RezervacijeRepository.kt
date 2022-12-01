@@ -19,7 +19,7 @@ class RezervacijeRepository {
                         getAllReservations()
                     } catch (ex: Exception) {
                     }
-                    delay(10 * 1000)
+                    delay(5 * 1000)
                 }
             }
         }

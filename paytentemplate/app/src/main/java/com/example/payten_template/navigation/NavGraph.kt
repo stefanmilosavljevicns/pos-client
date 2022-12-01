@@ -1,13 +1,13 @@
     package com.example.payten_template.navigation
 
-    import androidx.compose.foundation.layout.Box
-    import androidx.compose.foundation.layout.fillMaxSize
     import androidx.compose.runtime.Composable
-    import androidx.compose.ui.Modifier
     import androidx.navigation.NavHostController
+    import androidx.navigation.NavType
     import androidx.navigation.compose.NavHost
     import androidx.navigation.compose.composable
+    import androidx.navigation.navArgument
     import com.example.payten_template.*
+    import com.example.payten_template.ui.core.RezervacijaScreen
 
 
     @Composable
@@ -32,6 +32,17 @@
                 Rezervisi(navController = navController)
             }
             composable(route = Screen.Arhiva.route) {
-                Arhiva(navController = navController)
+                ArhivaScreen(navController = navController)
+            }
+            composable(
+                "${Screen.Rezervacija.route}/{sId}",
+                arguments = listOf(navArgument("sId") {
+                    type = NavType.StringType
+                })
+            ) {
+                RezervacijaScreen(
+                    navController = navController,
+                    id = it.arguments?.getString("sId") ?: ""
+                )
             }
         }}

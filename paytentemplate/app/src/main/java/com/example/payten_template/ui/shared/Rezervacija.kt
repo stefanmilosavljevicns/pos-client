@@ -14,8 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.ui.text.capitalize
 import com.example.payten_template.Data.Rezervacija
 import com.example.payten_template.Data.Rezervacija.Companion.reservationDateFormat
+import com.example.payten_template.ui.theme.ButtonColor
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,7 +35,7 @@ fun Rezervacija(
     ) {
         Row(modifier = Modifier
             .fillMaxSize()
-            .background(if (rezervacija.placeno) Color.Green else Color.LightGray)
+            .background(if (rezervacija.placeno) ButtonColor else Color.LightGray)
             .padding(16.dp)) {
             Column {
                 val date = reservationDateFormat.parse(rezervacija.reservation)
@@ -41,14 +43,15 @@ fun Rezervacija(
                     Text(
                         text = SimpleDateFormat("HH:mm").format(date),
                         style = MaterialTheme.typography.h4,
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if(rezervacija.placeno) Color.White else Color.Black,
                     )
                     //Spacer(modifier = Modifier.size(8.dp))
                     Text(
                         modifier = Modifier.padding(4.dp),
                         text = SimpleDateFormat("dd.MM.yy").format(date),
                         style = MaterialTheme.typography.h6,
-                        color = Color.DarkGray
+                        color = if(rezervacija.placeno) Color.White else Color.DarkGray,
                     )
                 }
                 Row(
@@ -57,11 +60,13 @@ fun Rezervacija(
                 ) {
                     Text(
                         text = rezervacija.name,
-                        style = MaterialTheme.typography.body1
+                        style = MaterialTheme.typography.body1,
+                        color = if(rezervacija.placeno) Color.White else Color.Black,
                     )
                     Text(
-                        text = rezervacija.services ?: "Sisanje",
-                        style = MaterialTheme.typography.body1
+                        text = rezervacija.services?.capitalize() ?: "Sisanje",
+                        style = MaterialTheme.typography.body1,
+                        color = if(rezervacija.placeno) Color.White else Color.Black,
                     )
                 }
             }

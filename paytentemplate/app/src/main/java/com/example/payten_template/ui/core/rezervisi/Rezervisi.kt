@@ -1,5 +1,6 @@
 package com.example.payten_template
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,14 +8,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -77,45 +77,53 @@ fun Rezervisi(
                     .padding(8.dp), imageVector = Icons.Filled.ArrowBack, contentDescription = "back")
                 Spacer(modifier = Modifier.size(8.dp))
                 Column {
-                    Text(text = "Rezervisi termin za",  style = MaterialTheme.typography.h4)
+                    Text(text = "Rezervisi termin",  style = MaterialTheme.typography.h4)
                 }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                CustomRadioButton(
-                    isSelected = rezervisiViewModel.selectedDate.toLocalDate().equals(LocalDate.now()),
-                    onClick = {
-                        rezervisiViewModel.selectedDate = LocalDateTime.now()
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .rotate(90f)
+                        .clickable {
+                            val newDate = rezervisiViewModel.selectedDate.minusDays(1)
+                            if(newDate.isAfter(LocalDate.now().atStartOfDay()) || newDate.isEqual(LocalDate.now().atStartOfDay())){
+                                rezervisiViewModel.selectedDate = newDate
+                                rezervisiViewModel.generisiTermine()
+                            }
+                        },
+                    imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = "previous date"
+                )
+                var text = rezervisiViewModel.selectedDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+                if(rezervisiViewModel.selectedDate.toLocalDate().isEqual(LocalDate.now())){
+                    text = "Danas"
+                }
+                if(rezervisiViewModel.selectedDate.toLocalDate().isEqual(LocalDate.now().plusDays(1))){
+                    text = "Sutra"
+                }
+                Text(
+                    modifier = Modifier.width(80.dp),
+                    text = text,
+                    style = MaterialTheme.typography.body1,
+                    textAlign = TextAlign.Center
+                )
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .rotate(-90f)
+                        .clickable {
+                        rezervisiViewModel.selectedDate = rezervisiViewModel.selectedDate.plusDays(1)
                         rezervisiViewModel.generisiTermine()
-                    }
-                ) {
-                    Text("Danas")
-                }
-                Spacer(modifier = Modifier.size(8.dp))
-                CustomRadioButton(
-                    isSelected = rezervisiViewModel.selectedDate.toLocalDate().equals(LocalDate.now().plusDays(1)),
-                    onClick = {
-                    rezervisiViewModel.selectedDate = LocalDateTime
-                        .now()
-                        .withHour(0)
-                        .withMinute(0)
-                        .plusDays(1)
-                    rezervisiViewModel.generisiTermine()
-                }) {
-                    Text("Sutra")
-                }
-                Spacer(modifier = Modifier.size(8.dp))
-                CustomRadioButton(
-                    isSelected = false,
-                    onClick = { /*TODO*/ }
-                ) {
-                    Text("Izaberi")
-                }
+                    },
+                    imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = "next date"
+                )
             }
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(text = "Dostupni termini", style = MaterialTheme.typography.subtitle1)
             Spacer(modifier = Modifier.size(16.dp))
             if(rezervisiViewModel.termini.isNotEmpty()){
                 LazyColumn(
@@ -143,7 +151,12 @@ fun Rezervisi(
             Box(
                 Modifier
                     .fillMaxSize()
-                    .background(ModalBackground))
+                    .background(ModalBackground)
+                    .clickable(indication = null,
+                        interactionSource = remember { MutableInteractionSource() }) {
+                        showDialog = false
+                    }
+            )
             Box(modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .wrapContentHeight(),

@@ -22,8 +22,8 @@ class RezervisiViewModel: ViewModel() {
     var selectedDate = LocalDateTime.now()
 
     companion object{
-        const val startWorkHour = 15
-        const val endWorkHour = 21
+        const val startWorkHour = 9
+        const val endWorkHour = 17
     }
 
     val usluge = Usluge.keys.toList()
@@ -93,8 +93,12 @@ class RezervisiViewModel: ViewModel() {
 
     fun rezervisi(rezervacija: Rezervacija){
         networkScope.launch {
-            rezervacijeRepository.addReservation(rezervacija)
-            rezervacijeRepository.getAllReservations()
+            try{
+                rezervacijeRepository.addReservation(rezervacija)
+                rezervacijeRepository.getAllReservations()
+            }catch (ex: Exception){
+
+            }
         }
     }
 }
