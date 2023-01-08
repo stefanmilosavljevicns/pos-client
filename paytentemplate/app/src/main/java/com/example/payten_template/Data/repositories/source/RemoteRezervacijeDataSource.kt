@@ -13,7 +13,7 @@ import io.ktor.serialization.kotlinx.json.*
 class RemoteRezervacijeDataSource {
 
     companion object{
-        private const val baseUrl = "http://161.97.170.99:8081/api/v1"
+        private const val baseUrl = "http://161.97.170.99:9097/api/v1"
         private const val getAllReservationsUrl = "${baseUrl}/getAllReservations"
         private const val addReservationUrl = "${baseUrl}/addReservation"
     }

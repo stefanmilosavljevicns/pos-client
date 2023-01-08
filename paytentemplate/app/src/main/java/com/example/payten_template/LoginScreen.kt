@@ -139,7 +139,7 @@ fun LoginScreen(navController: NavController) {
                 }
             }
             val customer: Array<String> =
-                client.get("http://161.97.170.99:8081/api/v1/getAllLocations").body()
+                client.get("http://161.97.170.99:9097/api/v1/getAllLocations").body()
             listItems = customer
 
         }
@@ -228,7 +228,7 @@ fun LoginScreen(navController: NavController) {
                                             }
                                         }
                                         val customer: Array<User> =
-                                            client.get("http://161.97.170.99:8081/api/v1/getLocation/" + selectedItem)
+                                            client.get("http://161.97.170.99:9097/api/v1/getLocation/" + selectedItem)
                                                 .body()
                                         repository.deleteAllTodos()
                                         for (i in customer.indices) {
