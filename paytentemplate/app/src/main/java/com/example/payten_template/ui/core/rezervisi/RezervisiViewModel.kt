@@ -2,23 +2,19 @@ package com.example.payten_template.ui.core.rezervisi
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import com.example.payten_template.Data.Rezervacija
-import com.example.payten_template.Data.Usluge
-import com.example.payten_template.Data.repositories.RezervacijeRepository
+import com.example.payten_template.domain.Reservation
+import com.example.payten_template.domain.Usluge
+import com.example.payten_template.repositories.ReservationRepository
 import com.example.payten_template.utils.filterByDate
 import com.example.payten_template.utils.rezervationDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.util.*
 
 class RezervisiViewModel: ViewModel() {
 
-    private val rezervacijeRepository = RezervacijeRepository.Instance
+    private val reservationRepository = ReservationRepository.Instance
     var selectedDate = LocalDateTime.now()
 
     companion object{
@@ -50,7 +46,7 @@ class RezervisiViewModel: ViewModel() {
         }
         val endHours = endWorkHour
         val fakeTermini = mutableListOf<LocalDateTime>()
-        val rezervacijeNaDan = rezervacijeRepository.rezervacije.value.filterByDate(selectedDate.toLocalDate())
+        val rezervacijeNaDan = reservationRepository.reservations.value.filterByDate(selectedDate.toLocalDate())
         val zauzetiTermini = rezervacijeNaDan.mapNotNull { it.reservation.rezervationDate() }.toMutableList()
         zauzetiTermini.addAll(
             rezervacijeNaDan.filter {
@@ -91,11 +87,11 @@ class RezervisiViewModel: ViewModel() {
         }
     }
 
-    fun rezervisi(rezervacija: Rezervacija){
+    fun rezervisi(rezervacija: Reservation){
         networkScope.launch {
             try{
-                rezervacijeRepository.addReservation(rezervacija)
-                rezervacijeRepository.getAllReservations()
+                reservationRepository.addReservation(rezervacija)
+                reservationRepository.getAllReservations()
             }catch (ex: Exception){
 
             }

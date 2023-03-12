@@ -1,4 +1,4 @@
-package com.example.payten_template.Data
+package com.example.payten_template.domain
 
 val Usluge = mapOf<String, Double>(
     "Sisanje" to 600.0,

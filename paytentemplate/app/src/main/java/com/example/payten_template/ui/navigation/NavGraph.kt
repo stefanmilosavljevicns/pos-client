@@ -1,4 +1,4 @@
-    package com.example.payten_template.navigation
+    package com.example.payten_template.ui.navigation
 
     import androidx.compose.runtime.Composable
     import androidx.navigation.NavHostController
@@ -8,6 +8,7 @@
     import androidx.navigation.navArgument
     import com.example.payten_template.*
     import com.example.payten_template.ui.core.RezervacijaScreen
+    import com.example.payten_template.ui.core.orders.OrdersScreen
 
 
     @Composable
@@ -33,6 +34,12 @@
             }
             composable(route = Screen.Arhiva.route) {
                 ArhivaScreen(navController = navController)
+            }
+            composable(route = Screen.ArchivedOrders.route) {
+                OrdersScreen(archive = true, navController = navController)
+            }
+            composable(route = Screen.Orders.route) {
+                OrdersScreen(navController = navController)
             }
             composable(
                 "${Screen.Rezervacija.route}/{sId}",

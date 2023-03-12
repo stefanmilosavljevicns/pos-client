@@ -15,12 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.payten_template.Data.Rezervacija
-import com.example.payten_template.Data.repositories.RezervacijeRepository
-import com.example.payten_template.navigation.Screen
+import com.example.payten_template.domain.Reservation
+import com.example.payten_template.repositories.ReservationRepository
 
 @Composable
 fun RezervacijaScreen(
@@ -30,18 +28,18 @@ fun RezervacijaScreen(
     var isLoading by remember {
         mutableStateOf(true)
     }
-    var rezervacija by remember {
-        mutableStateOf<Rezervacija?>(null)
+    var reservation by remember {
+        mutableStateOf<Reservation?>(null)
     }
     var isFailed by remember {
         mutableStateOf(false)
     }
     LaunchedEffect(Unit){
         isLoading = true
-        RezervacijeRepository.Instance.rezervacije.value.find {
+        ReservationRepository.Instance.reservations.value.find {
             it.id == id
         }?.let {
-            rezervacija = it
+            reservation = it
         } ?: kotlin.run {
             isFailed = true
         }
@@ -95,7 +93,7 @@ fun RezervacijaScreen(
                     }
                 }
             }
-            rezervacija?.let {
+            reservation?.let {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()

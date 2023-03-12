@@ -1,4 +1,4 @@
-package com.example.payten_template.Data
+package com.example.payten_template.domain
 
 import android.content.Context
 import androidx.room.Database

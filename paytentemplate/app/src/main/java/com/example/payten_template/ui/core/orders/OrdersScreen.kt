@@ -1,8 +1,5 @@
-package com.example.payten_template
+package com.example.payten_template.ui.core.orders
 
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,48 +22,41 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.payten_template.domain.Reservation
 import com.example.payten_template.domain.Usluge
 import com.example.payten_template.repositories.ReservationRepository
 import com.example.payten_template.ui.navigation.Screen
 import com.example.payten_template.payment.PaymentManager
-import com.example.payten_template.ui.core.rezervacije.RezervacijeViewModel
-import com.example.payten_template.ui.shared.Rezervacija
-import com.example.payten_template.utils.rezervationDate
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import io.github.g00fy2.quickie.QRResult
-import io.github.g00fy2.quickie.ScanQRCode
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.example.payten_template.R
+import com.example.payten_template.domain.Order
+import com.example.payten_template.ui.shared.OrderListItem
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Rezervacije(
+fun OrdersScreen(
+    archive: Boolean = false,
     navController: NavController,
-    rezervacijeViewModel: RezervacijeViewModel = viewModel(
-        viewModelStoreOwner = ((LocalContext.current as? ViewModelStoreOwner)?: LocalViewModelStoreOwner) as ViewModelStoreOwner
-    )
+    ordersViewModel: OrdersViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ScanQRCode()){
-        if (it is QRResult.QRSuccess) {
-            //Toast.makeText(context, it.content.rawValue, Toast.LENGTH_SHORT).show()
-            navController.navigate("${Screen.Rezervacija.route}/${it.content.rawValue}")
-        }
-        if (it is QRResult.QRError){
-            Toast.makeText(context, "Nevalidan QR code", Toast.LENGTH_SHORT).show()
-        }
-    }
-    var rez by remember {
-        mutableStateOf<Reservation?>(null)
+    val scope = rememberCoroutineScope()
+    var orderToPay by remember {
+        mutableStateOf<Order?>(null)
     }
     val paymentManager = PaymentManager(LocalContext.current)
+    val orders by if(archive){
+        ordersViewModel.archivedOrders.collectAsState(listOf())
+    }else{
+        ordersViewModel.orders.collectAsState(listOf())
+    }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             modifier = Modifier
@@ -84,53 +74,42 @@ fun Rezervacije(
                     .padding(8.dp), imageVector = Icons.Filled.ArrowBack, contentDescription = "back")
                 Spacer(modifier = Modifier.size(8.dp))
                 Column {
-                    Text(text = "Rezervacije",  style = MaterialTheme.typography.h4)
+                    Text(text = "Porudzbine",  style = MaterialTheme.typography.h4)
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    modifier = Modifier
-                        .clickable {
-                            launcher.launch(null)
-                        }
-                        .size(32.dp)
-                    ,
-                    painter = painterResource(id = R.drawable.ic_qr_code),
-                    contentDescription = "scan qr code"
-                )
             }
             Spacer(modifier = Modifier.size(8.dp))
-            Text(text = "Lista trenutnih rezervacija", style = MaterialTheme.typography.subtitle1)
+            Text(text = "Lista trenutnih porudzbina", style = MaterialTheme.typography.subtitle1)
             Spacer(modifier = Modifier.size(16.dp))
             SwipeRefresh(
-                modifier = Modifier.defaultMinSize(minHeight = 200.dp).weight(1f),
-                state = rememberSwipeRefreshState(rezervacijeViewModel.isLoading),
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 200.dp)
+                    .weight(1f),
+                state = rememberSwipeRefreshState(ordersViewModel.isLoading),
                 onRefresh = {
-                rezervacijeViewModel.refresh()
-            }) {
+                    ordersViewModel.refresh()
+                }) {
                 LazyColumn(
                     content = {
-                        //var date:LocalDate? = null
-                        items(rezervacijeViewModel.rezervacije){ rezervacija ->
-                            val date = rezervacija.reservation.rezervationDate()!!.toLocalDate()
-                            /*if(date == null){
-                                Text(text = newDate.toString())
-                                Spacer(modifier = Modifier.size(8.dp))
-                                date = newDate
-                            }else{
-                                if(newDate.isAfter(date)){
-                                    Text(text = newDate.toString())
-                                    Spacer(modifier = Modifier.size(8.dp))
-                                    date = newDate
-                                }
-                            }*/
-                            Rezervacija(
+                        items(orders){ order ->
+                            OrderListItem(
                                 modifier = Modifier
                                     .fillMaxWidth(),
-                                rezervacija = rezervacija,
-                                onClick = {
-                                    if(!rezervacija.placeno) {
-                                        rez = rezervacija
+                                order = order,
+                                onAccept = {
+                                   scope.launch {
+                                       ordersViewModel.acceptOrder(order)
+                                       ordersViewModel.refresh()
+                                   }
+                                },
+                                onDecline = {
+                                    scope.launch {
+                                        ordersViewModel.declineOrder(order)
+                                        ordersViewModel.refresh()
                                     }
+                                },
+                                handlePayment = {
+                                    orderToPay = it
                                 }
                             )
                             Spacer(modifier = Modifier.size(8.dp))
@@ -147,8 +126,8 @@ fun Rezervacije(
             }) {
             Icon(Icons.Filled.Add,"add reservation")
         }
-        rez?.let { rezervacija ->
-            androidx.compose.ui.window.Dialog(onDismissRequest = { rez = null }) {
+        orderToPay?.let { order ->
+            androidx.compose.ui.window.Dialog(onDismissRequest = { orderToPay = null }) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -165,17 +144,17 @@ fun Rezervacije(
                         Column(
                             modifier = Modifier
                                 .clickable {
-                                    val amount = Usluge[rezervacija.services] ?: 600.0
-                                    CoroutineScope(Dispatchers.IO).launch {
+                                    scope.launch {
                                         try{
-                                            rezervacija.placeno = true
-                                            ReservationRepository.Instance.updateReservation(rezervacija)
-                                            rezervacijeViewModel.refresh()
-                                            paymentManager.requestPrintBill(
-                                                rezervacija,
-                                                amount,
-                                            )
-                                            rez = null
+                                            //rezervacija.placeno = true
+                                            //ReservationRepository.Instance.updateReservation(rezervacija)
+
+                                            ordersViewModel.refresh()
+                                            /*paymentManager.requestPrintBill(
+                                                order,
+                                                order.price,
+                                            )*/
+                                            orderToPay = null
                                         }catch (ex: Exception){}
                                     }
 
@@ -198,13 +177,12 @@ fun Rezervacije(
                         Column(
                             modifier = Modifier
                                 .clickable {
-                                    val amount = Usluge[rezervacija.services] ?: 600.0
                                     paymentManager.requestPayment(
-                                        rezervacija.id ?: "",
-                                        amount,
-                                        rezervacija.worker
+                                        order.id,
+                                        order.price,
+                                        order.viberID
                                     )
-                                    rez = null
+                                    orderToPay = null
                                 },
                             horizontalAlignment = CenterHorizontally
                         ) {
@@ -225,11 +203,4 @@ fun Rezervacije(
             }
         }
     }
-
-}
-
-@androidx.compose.ui.tooling.preview.Preview
-@Composable
-fun RezervacijePreview(){
-    Rezervacije(navController = NavController(LocalContext.current))
 }

@@ -17,7 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.payten_template.navigation.Screen
+import com.example.payten_template.ui.navigation.Screen
 import com.example.payten_template.ui.theme.Purple700
 import kotlinx.coroutines.delay
 

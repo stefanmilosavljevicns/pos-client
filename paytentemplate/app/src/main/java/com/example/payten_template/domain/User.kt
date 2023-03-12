@@ -1,4 +1,4 @@
-package com.example.payten_template.Data
+package com.example.payten_template.domain
 
 
 import androidx.room.Entity
@@ -18,5 +18,5 @@ data class User(
     val creationDate: String,
     val location: String?,
     val role: String,
-    val grade: Float
+    //val grade: Float
 )

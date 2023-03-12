@@ -2,7 +2,7 @@ package com.example.payten_template.payment
 
 import android.content.Context
 import android.content.Intent
-import com.example.payten_template.Data.Rezervacija
+import com.example.payten_template.domain.Reservation
 import com.example.payten_template.payment.domain.request.*
 import com.example.payten_template.utils.Base64Image
 import kotlinx.serialization.encodeToString
@@ -33,7 +33,7 @@ class PaymentManager(
         saleRequest.send()
     }
 
-    fun requestPrintBill(rezervacija: Rezervacija, amount: Double){
+    fun requestPrintBill(rezervacija: Reservation, amount: Double){
         val printRequest = PaynetMessage(
             header = Header.Default,
             request = PaynetRequest(

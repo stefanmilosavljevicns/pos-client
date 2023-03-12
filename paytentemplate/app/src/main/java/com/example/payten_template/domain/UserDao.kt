@@ -1,4 +1,4 @@
-package com.example.payten_template.Data
+package com.example.payten_template.domain
 
 
 import androidx.room.*
@@ -21,5 +21,5 @@ interface UserDao {
     suspend fun delete(item: User)
 
     @Query("DELETE FROM my_todo_list")
-    suspend fun deleteAllTodos()
+    suspend fun deleteAllUsers()
 }

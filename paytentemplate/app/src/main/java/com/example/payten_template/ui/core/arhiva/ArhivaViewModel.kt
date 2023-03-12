@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.payten_template.Data.Rezervacija
-import com.example.payten_template.Data.repositories.RezervacijeRepository
+import com.example.payten_template.domain.Reservation
+import com.example.payten_template.repositories.ReservationRepository
 import com.example.payten_template.utils.rezervationDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,18 +17,18 @@ import java.time.LocalDate
 
 class ArhivaViewModel: ViewModel() {
 
-    val rezervacije = mutableStateListOf<Rezervacija>()
+    val rezervacije = mutableStateListOf<Reservation>()
     var isLoading by mutableStateOf(false)
 
     //private var _isLoading = false
-    private val rezervacijeRepository = RezervacijeRepository.Instance
+    private val reservationRepository = ReservationRepository.Instance
     private val networkScope = CoroutineScope(Dispatchers.IO)
 
 
     init {
         refresh()
         viewModelScope.launch {
-            rezervacijeRepository.rezervacije.collect{
+            reservationRepository.reservations.collect{
                 rezervacije.clear()
                 rezervacije.addAll(it.filter { rez ->
                     rez.reservation.rezervationDate()?.let{ date ->
@@ -50,7 +50,7 @@ class ArhivaViewModel: ViewModel() {
                 isLoading = true
             }
             try{
-                val rezs = rezervacijeRepository.getAllReservations()
+                val rezs = reservationRepository.getAllReservations()
             }catch (ex: Exception){ }
             withContext(Dispatchers.Main){
                 isLoading = false

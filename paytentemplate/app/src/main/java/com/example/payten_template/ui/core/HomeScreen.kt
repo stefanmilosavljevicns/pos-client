@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.payten_template.navigation.Screen
+import com.example.payten_template.ui.navigation.Screen
 import com.example.payten_template.ui.theme.ButtonColor
 import io.github.g00fy2.quickie.QRResult
 import io.github.g00fy2.quickie.ScanQRCode
@@ -81,7 +81,11 @@ fun HomeScreen(navController: NavController) {
         val title = listOf("Rezervacije","Rezervisi","Arhiva","QR Skener")
         val desc = listOf("Pregledajte listu rezervacija","Izvrsite rezervaciju novog termina","Pregledajte arhivu","Skeniraj QR kod")
         val ids = listOf(R.drawable.rezervacije,R.drawable.rezervisi,R.drawable.arhiva,R.drawable.ic_qr_code)
-        val navigations = listOf(Screen.Rezervacije.route,Screen.Rezervisi.route,Screen.Arhiva.route,Screen.LoginScreen.route)
+        val navigations = listOf(
+            Screen.Orders.route,
+            Screen.Rezervisi.route,
+            Screen.ArchivedOrders.route,
+            Screen.LoginScreen.route)
         //val picture_ids = listOf()
 
         LazyVerticalGrid(

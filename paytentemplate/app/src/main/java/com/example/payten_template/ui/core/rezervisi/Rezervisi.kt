@@ -21,19 +21,15 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.payten_template.Data.Rezervacija
-import com.example.payten_template.Data.Rezervacija.Companion.reservationDateFormat
+import com.example.payten_template.domain.Reservation
+import com.example.payten_template.domain.Reservation.Companion.reservationDateFormat
 import com.example.payten_template.ui.core.rezervisi.RezervisiViewModel
-import com.example.payten_template.ui.shared.CustomRadioButton
 import com.example.payten_template.ui.shared.TerminListItem
 import com.example.payten_template.ui.theme.ModalBackground
-import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -241,7 +237,7 @@ fun Rezervisi(
                             enabled = name.isNotBlank(),
                             onClick = {
                                 rezervisiViewModel.rezervisi(
-                                    Rezervacija(
+                                    Reservation(
                                         name = name,
                                         reservation = currentTermin,
                                         worker = "worker",

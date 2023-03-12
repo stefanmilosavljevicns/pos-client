@@ -1,9 +1,9 @@
-package com.example.payten_template.Data
+package com.example.payten_template.domain
 
 import java.text.SimpleDateFormat
 
 @kotlinx.serialization.Serializable
-data class Rezervacija(
+data class Reservation(
     var id: String? = null,
     var name: String,
     var reservation: String,

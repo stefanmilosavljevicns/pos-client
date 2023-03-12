@@ -1,6 +1,7 @@
 package com.example.payten_template
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,20 +27,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.payten_template.Data.User
-import com.example.payten_template.Data.UserDB
-import com.example.payten_template.Data.repositories.UserRepository
-import com.example.payten_template.navigation.Screen
+import com.example.payten_template.domain.User
+import com.example.payten_template.domain.UserDB
+import com.example.payten_template.repositories.UserRepository
+import com.example.payten_template.ui.navigation.Screen
 import com.example.payten_template.ui.theme.ButtonColor
 import com.example.payten_template.ui.theme.primaryColor
 import com.example.payten_template.ui.theme.whiteBackground
+import com.example.payten_template.utils.baseURL
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 
 
@@ -127,30 +129,30 @@ fun LoginScreen(navController: NavController) {
     //                openDialogLogin.value = true
     if (openDialogSync.value) {
 
-        var listItems =
-            arrayOf("Ovde", "ce", "se", "vuci", "/getAllLocations", "sa", "backend-a")
-        runBlocking {
-            val client = HttpClient(CIO) {
-                install(ContentNegotiation) {
-                    json(Json {
-                        prettyPrint = true
-                        isLenient = true
-                    })
-                }
-            }
-            val customer: Array<String> =
-                client.get("http://161.97.170.99:8081/api/v1/getAllLocations").body()
-            listItems = customer
-
+        var locations by remember {
+            mutableStateOf(arrayOf<String>())
         }
         val contextForToast = LocalContext.current.applicationContext
 
-        var selectedItem by remember {
-            mutableStateOf(listItems[0])
+        var selectedLocation by remember {
+            mutableStateOf<String?>(null)
         }
         var expanded by remember {
             mutableStateOf(false)
         }
+            //arrayOf("Ovde", "ce", "se", "vuci", "/getAllLocations", "sa", "backend-a")
+        LaunchedEffect(key1 = openDialogSync.value) {
+            try{
+                locations = fetchLocationData()
+                locations.firstOrNull()?.let {
+                    selectedLocation = it
+                }
+            }catch (ex: Exception){
+                Log.e("TAG", ex.message ?: "Unknown message")
+                openDialogSync.value = false
+            }
+        }
+
 
         AlertDialog(
             onDismissRequest = {
@@ -185,8 +187,7 @@ fun LoginScreen(navController: NavController) {
 
                         // text field
                         TextField(
-
-                            value = selectedItem,
+                            value = selectedLocation ?: "",
                             textStyle = LocalTextStyle.current.copy(
                                 textAlign = TextAlign.Center,
                                 color = Color.White
@@ -209,34 +210,37 @@ fun LoginScreen(navController: NavController) {
                             onDismissRequest = { expanded = false }
                         ) {
 
-                            listItems.forEach { selectedOption ->
+                            locations.forEach { selectedOption ->
                                 // menu item
                                 DropdownMenuItem(onClick = {
-                                    selectedItem = selectedOption
-                                    Toast.makeText(
-                                        contextForToast,
-                                        "Popunjavam tabelu za " + selectedItem,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    runBlocking {
-                                        val client = HttpClient(CIO) {
-                                            install(ContentNegotiation) {
-                                                json(Json {
-                                                    prettyPrint = true
-                                                    isLenient = true
-                                                })
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        try{
+                                            withContext(Dispatchers.Main){
+                                                selectedLocation = selectedOption
+                                            }
+                                            /*Toast.makeText(
+                                                contextForToast,
+                                                "Popunjavam tabelu za " + selectedLocation,
+                                                Toast.LENGTH_SHORT
+                                            ).show()*/
+                                            val customer: Array<User> = getUsersByLocation(selectedOption)
+                                            repository.deleteAllUsers()
+                                            for (i in customer.indices) {
+                                                repository.addUser(customer[i])
+                                            }
+                                            withContext(Dispatchers.Main) {
+                                                expanded = false
+                                                openDialogSync.value = false
+                                            }
+                                        }catch (ex: Exception){
+                                            withContext(Dispatchers.Main){
+                                                Log.e("Payten", ex.message ?: "Unknown message")
+                                                Toast.makeText(contextForToast, "Greska prilikom selektovanja", Toast.LENGTH_SHORT)
+                                                    .show()
                                             }
                                         }
-                                        val customer: Array<User> =
-                                            client.get("http://161.97.170.99:8081/api/v1/getLocation/" + selectedItem)
-                                                .body()
-                                        repository.deleteAllTodos()
-                                        for (i in customer.indices) {
-                                            repository.addTodo(customer[i])
-                                        }
+                                        
                                     }
-                                    expanded = false
-                                    openDialogSync.value = false
                                 }) {
                                     Text(text = selectedOption)
                                 }
@@ -249,8 +253,7 @@ fun LoginScreen(navController: NavController) {
     }
     if (openDialogLogin.value) {
 
-
-        val contextForToast = LocalContext.current.applicationContext
+        val context = LocalContext.current.applicationContext
         val listItems = customerDb.todoDao().getAll()
         var selectedItem by remember {
             mutableStateOf(listItems[0])
@@ -365,7 +368,7 @@ fun LoginScreen(navController: NavController) {
                                     navController.navigate(route = Screen.HomeScreen.route)
                                 } else {
                                     Toast.makeText(
-                                        contextForToast,
+                                        context,
                                         "Neispravan PIN, pokusajte ponovo!",
                                         Toast.LENGTH_SHORT
                                     ).show()
@@ -381,9 +384,31 @@ fun LoginScreen(navController: NavController) {
             })
     }
 
-
 }
 
+private suspend fun getUsersByLocation(selectedItem: String): Array<User> {
+    val client = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+            })
+        }
+    }
+    return client.get("$baseURL/getUsersByLocation/$selectedItem").body()
+}
+
+suspend fun fetchLocationData(): Array<String> {
+    val client = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+            })
+        }
+    }
+    return client.get("$baseURL/getAllLocations").body()
+}
 
 
 

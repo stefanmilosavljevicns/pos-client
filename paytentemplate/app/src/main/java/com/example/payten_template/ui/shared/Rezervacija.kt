@@ -14,9 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.ui.text.capitalize
-import com.example.payten_template.Data.Rezervacija
-import com.example.payten_template.Data.Rezervacija.Companion.reservationDateFormat
+import com.example.payten_template.domain.Reservation
+import com.example.payten_template.domain.Reservation.Companion.reservationDateFormat
 import com.example.payten_template.ui.theme.ButtonColor
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,7 +23,7 @@ import java.util.*
 @Composable
 fun Rezervacija(
     modifier: Modifier = Modifier,
-    rezervacija: Rezervacija,
+    rezervacija: Reservation,
     onClick: () -> Unit = {}
 ){
     Card(
@@ -80,7 +79,7 @@ fun Rezervacija_Preview(){
     Column {
         Rezervacija(
             modifier = Modifier.height(100.dp),
-            rezervacija = Rezervacija(
+            rezervacija = Reservation(
                 id = "23ntio2vneir2neovrowienvfw",
                 name = "Marko",
                 reservation = reservationDateFormat.format(Date()),
