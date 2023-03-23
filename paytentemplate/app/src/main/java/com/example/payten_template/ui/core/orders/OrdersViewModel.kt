@@ -1,5 +1,6 @@
 package com.example.payten_template.ui.core.orders
 
+import android.util.Log
 import androidx.compose.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,8 +41,13 @@ class OrdersViewModel: ViewModel() {
     fun refresh(){
         viewModelScope.launch {
             isLoading = true
-            ordersRepository.refresh()
-            isLoading = false
+            try{
+                ordersRepository.refresh()
+            }catch (ex: Exception){
+                Log.e("OrdersViewModel", "Unable to fetch orders", ex)
+            }finally {
+                isLoading = false
+            }
         }
     }
 

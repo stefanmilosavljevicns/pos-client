@@ -55,7 +55,7 @@ fun OrderListItem(
                     style = MaterialTheme.typography.subtitle1.copy(fontWeight = FontWeight.Bold)
                 )
                 Text(
-                    text = order.description,
+                    text = order.description.joinToString { it + "\n" }.removeSuffix("\n"),
                     style = MaterialTheme.typography.subtitle1
                 )
             }
@@ -64,7 +64,7 @@ fun OrderListItem(
                 verticalArrangement = Arrangement.SpaceAround
             ) {
                 val dateTimeFormatter = DateTimeFormatter.ofPattern("MM.dd HH:mm")
-                val pickupDateTime = order.getPickupDate()?.format(dateTimeFormatter) ?: order.pickupTime
+                val pickupDateTime = order.getPickupDate()?.format(dateTimeFormatter) ?: order.startTime
                 Text(
                     text = pickupDateTime,
                     style = MaterialTheme.typography.h6,
@@ -153,38 +153,38 @@ fun OrderListItem_Preview(){
     val orders = listOf(
         Order(
             id = UUID.randomUUID().toString(),
-            description = "2 velike porodicke kapricoze",
+            description = arrayOf("2 velike porodicke kapricoze"),
             price = 2500.0,
             state = OrderState.PENDING,
-            creationTime = "2023-02-05T14:30:00",
-            pickupTime = "2023-02-05T17:30:00",
+            endTime = "2023-02-05T14:30:00",
+            startTime = "2023-02-05T17:30:00",
             viberID = "viberuser2"
         ),
         Order(
             id = UUID.randomUUID().toString(),
-            description = "2 velike porodicke kapricoze",
+            description = arrayOf("2 velike porodicke kapricoze"),
             price = 2500.0,
             state = OrderState.IN_PROGRESS,
-            creationTime = "2023-02-05T14:30:00",
-            pickupTime = "2023-02-05T17:30:00",
+            endTime = "2023-02-05T14:30:00",
+            startTime = "2023-02-05T17:30:00",
             viberID = "viberuser2"
         ),
         Order(
             id = UUID.randomUUID().toString(),
-            description = "2 velike porodicke kapricoze",
+            description = arrayOf("2 velike porodicke kapricoze"),
             price = 2500.0,
             state = OrderState.COMPLETED,
-            creationTime = "2023-02-05T14:30:00",
-            pickupTime = "2023-02-05T17:30:00",
+            endTime = "2023-02-05T14:30:00",
+            startTime = "2023-02-05T17:30:00",
             viberID = "viberuser2"
         ),
         Order(
             id = UUID.randomUUID().toString(),
-            description = "2 velike porodicke kapricoze",
+            description = arrayOf("2 velike porodicke kapricoze"),
             price = 2500.0,
             state = OrderState.DECLINED,
-            creationTime = "2023-02-05T14:30:00",
-            pickupTime = "2023-02-05T17:30:00",
+            endTime = "2023-02-05T14:30:00",
+            startTime = "2023-02-05T17:30:00",
             viberID = "viberuser2"
         )
     )

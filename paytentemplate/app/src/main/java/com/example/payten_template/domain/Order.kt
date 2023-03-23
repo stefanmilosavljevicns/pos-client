@@ -1,28 +1,24 @@
 package com.example.payten_template.domain
 
-import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 @kotlinx.serialization.Serializable
 class Order(
     val id: String,
-    val description: String,
+    val description: Array<String>,
     val price: Double,
-    val pickupTime: String,
-    val creationTime: String,
+    val startTime: String,
+    val endTime: String,
     val state: OrderState,
     val viberID: String
 ){
     fun getPickupDate(): LocalDateTime? {
-        return parseDatetime(pickupTime)
+        return parseDatetime(startTime)
     }
 
     fun getCreationDate(): LocalDateTime? {
-        return parseDatetime(creationTime)
+        return parseDatetime(endTime)
     }
 
     private fun parseDatetime(data: String): LocalDateTime?{
