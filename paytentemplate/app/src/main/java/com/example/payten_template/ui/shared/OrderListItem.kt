@@ -64,9 +64,11 @@ fun OrderListItem(
                 verticalArrangement = Arrangement.SpaceAround
             ) {
                 val dateTimeFormatter = DateTimeFormatter.ofPattern("MM.dd HH:mm")
-                val pickupDateTime = order.getPickupDate()?.format(dateTimeFormatter) ?: order.startTime
+                val startTime = order.getStartTime()?.format(dateTimeFormatter) ?: order.startTime
+                val endTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+                val endTime = order.getEndTime()?.format(endTimeFormatter) ?: order.endTime
                 Text(
-                    text = pickupDateTime,
+                    text = "$startTime-$endTime",
                     style = MaterialTheme.typography.h6,
                 )
                 Spacer(modifier = Modifier.size(16.dp))

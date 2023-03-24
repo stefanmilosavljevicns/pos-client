@@ -1,8 +1,6 @@
 package com.example.payten_template.ui.core.orders
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,14 +31,20 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clipToBounds
 import com.example.payten_template.R
 import com.example.payten_template.domain.Order
 import com.example.payten_template.ui.shared.OrderListItem
 import kotlinx.coroutines.launch
+import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun OrdersScreen(
     archive: Boolean = false,
@@ -57,6 +61,14 @@ fun OrdersScreen(
     }else{
         ordersViewModel.orders.collectAsState(listOf())
     }
+
+    val ordersByDate = orders.groupBy {
+        it.getStartTime()?.toLocalDate()
+    }
+
+    val refreshing = ordersViewModel.isLoading
+    val pullRefreshState = rememberPullRefreshState(refreshing, { ordersViewModel.refresh() })
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             modifier = Modifier
@@ -74,33 +86,39 @@ fun OrdersScreen(
                     .padding(8.dp), imageVector = Icons.Filled.ArrowBack, contentDescription = "back")
                 Spacer(modifier = Modifier.size(8.dp))
                 Column {
-                    Text(text = "Porudzbine",  style = MaterialTheme.typography.h4)
+                    Text(text = if(archive) "Arhiva" else "Rezervacije",  style = MaterialTheme.typography.h4)
                 }
                 Spacer(modifier = Modifier.weight(1f))
             }
             Spacer(modifier = Modifier.size(8.dp))
-            Text(text = "Lista trenutnih porudzbina", style = MaterialTheme.typography.subtitle1)
+            Text(text = "Lista proslih rezervacija", style = MaterialTheme.typography.subtitle1)
             Spacer(modifier = Modifier.size(16.dp))
-            SwipeRefresh(
-                modifier = Modifier
-                    .defaultMinSize(minHeight = 200.dp)
-                    .weight(1f),
-                state = rememberSwipeRefreshState(ordersViewModel.isLoading),
-                onRefresh = {
-                    ordersViewModel.refresh()
-                }) {
-                LazyColumn(
-                    content = {
-                        items(orders){ order ->
+            Box(
+                Modifier
+                    .clipToBounds()
+                    .pullRefresh(pullRefreshState)
+            ) {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    ordersByDate.keys.forEach { startTime ->
+                        if(startTime == null) return@forEach
+                        val dateTimeFormatter = DateTimeFormatter.ofPattern("MM.dd.YYYY")
+                        val startTimeText = startTime.format(dateTimeFormatter)
+                        val ords = ordersByDate[startTime] ?: listOf()
+                        Text(
+                            text = startTimeText,
+                            style = MaterialTheme.typography.h6
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        ords.forEach { order ->
                             OrderListItem(
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 order = order,
                                 onAccept = {
-                                   scope.launch {
-                                       ordersViewModel.acceptOrder(order)
-                                       ordersViewModel.refresh()
-                                   }
+                                    scope.launch {
+                                        ordersViewModel.acceptOrder(order)
+                                        ordersViewModel.refresh()
+                                    }
                                 },
                                 onDecline = {
                                     scope.launch {
@@ -114,7 +132,10 @@ fun OrdersScreen(
                             )
                             Spacer(modifier = Modifier.size(8.dp))
                         }
-                    })
+
+                    }
+                }
+                PullRefreshIndicator(refreshing, pullRefreshState, Modifier.align(Alignment.TopCenter))
             }
         }
         FloatingActionButton(

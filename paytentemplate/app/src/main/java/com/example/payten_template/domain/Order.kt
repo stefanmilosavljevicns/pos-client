@@ -13,11 +13,11 @@ class Order(
     val state: OrderState,
     val viberID: String
 ){
-    fun getPickupDate(): LocalDateTime? {
+    fun getStartTime(): LocalDateTime? {
         return parseDatetime(startTime)
     }
 
-    fun getCreationDate(): LocalDateTime? {
+    fun getEndTime(): LocalDateTime? {
         return parseDatetime(endTime)
     }
 
